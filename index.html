@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>משפט אקראי מ-zinbin.json</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f5f5f5; padding:24px; text-align:center; }
+  .card { background:#fff; padding:22px; border-radius:14px; margin:0 auto; max-width:520px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+  h1 { margin:0 0 12px; font-size:22px; }
+  #quote { font-size:22px; line-height:1.6; margin:18px 0; min-height:3em; }
+  .row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  button { cursor:pointer; padding:10px 16px; border:none; border-radius:10px; font-size:16px; background:#2f7d32; color:#fff; }
+  button[disabled] { opacity:.6; cursor:not-allowed; }
+  #status { color:#777; font-size:14px; margin-top:8px; min-height:1.2em; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>משפט אקראי</h1>
+    <div id="quote">טוען את zinbin.json…</div>
+    <div class="row">
+      <button id="nextBtn" disabled>תן לי משפט</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+<script>
+(() => {
+  const JSON_URL = 'quotes.json'; // ודא שהקובץ באותה תיקייה של ה-HTML
+  const quoteEl = document.getElementById('quote');
+  const statusEl = document.getElementById('status');
+  const nextBtn = document.getElementById('nextBtn');
+
+  let quotes = [];
+  let lastIndex = -1;
+
+  function toText(item) {
+    // תומך במבנים שונים: "טקסט", {text:""}, {quote:""}, {q:""}, או אובייקט עם שדות author
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+      const txt = item.text || item.quote || item.q || item.content;
+      const author = item.author || item.by || '';
+      return (txt ? txt : JSON.stringify(item)) + (author ? ` — ${author}` : '');
+    }
+    return String(item);
+  }
+
+  function pickRandom() {
+    if (!quotes.length) return;
+    let i;
+    do { i = Math.floor(Math.random() * quotes.length); }
+    while (quotes.length > 1 && i === lastIndex);
+    lastIndex = i;
+    quoteEl.textContent = toText(quotes[i]);
+  }
+
+  async function loadQuotes() {
+    try {
+      const res = await fetch(JSON_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      // תומך גם במערך ישיר וגם במפתח quotes
+      const arr = Array.isArray(data) ? data : (Array.isArray(data.quotes) ? data.quotes : []);
+      if (!arr.length) throw new Error('קובץ JSON ללא משפטים');
+      quotes = arr;
+      statusEl.textContent = '';
+    } catch (err) {
+      console.error('שגיאה בטעינת JSON:', err);
+      statusEl.textContent = '⚠️ לא הצלחתי לטעון את zinbin.json (בדוק נתיב/שרת/פורמט).';
+      quotes = ["גיבוי: כל צעד קטן הוא ניצחון."];
+    } finally {
+      nextBtn.disabled = false;
+      pickRandom();
+    }
+  }
+
+  nextBtn.addEventListener('click', pickRandom);
+  document.addEventListener('DOMContentLoaded', loadQuotes);
+})();
+</script>
+</body>
+</html>
