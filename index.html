@@ -1,83 +1,246 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>משפט אקראי מ-zinbin.json</title>
-<style>
-  body { font-family: Arial, sans-serif; background:#f5f5f5; padding:24px; text-align:center; }
-  .card { background:#fff; padding:22px; border-radius:14px; margin:0 auto; max-width:520px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
-  h1 { margin:0 0 12px; font-size:22px; }
-  #quote { font-size:22px; line-height:1.6; margin:18px 0; min-height:3em; }
-  .row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  button { cursor:pointer; padding:10px 16px; border:none; border-radius:10px; font-size:16px; background:#2f7d32; color:#fff; }
-  button[disabled] { opacity:.6; cursor:not-allowed; }
-  #status { color:#777; font-size:14px; margin-top:8px; min-height:1.2em; }
+  <meta charset="utf-8" />
+  <title>מעקב משמרות עבודה</title>
+  <style>
+body {
+  background: #f6f6f6;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', 'Alef', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.card {
+ background: #d99; /* אפור כסוף קלאסי */
+ box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 36px 28px;
+  margin: 28px 0;
+  width: 95vw;
+  max-width: 570px;
+  text-align: center;
+  transition: box-shadow 0.2s;
+  border: 1px solid #e2e8f0;
+}
+
+.card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+}
+
+h1, h2 {
+  font-weight: 700;
+  color: #293047;
+  font-size: 2em;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+h2 {
+  font-size: 1.3em;
+  color: #364156;
+  margin-bottom: 10px;
+}
+
+label {
+  font-size: 1.18em;
+  font-weight: 600;
+  color: #434553;
+  margin: 0 14px 10px 14px;
+  display: inline-block;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-left: 8px;
+  accent-color: #6c63ff;
+}
+
+button {
+  background: linear-gradient(90deg, #6c63ff 0%, #2b5876 100%);
+  color: #fff;
+  font-size: 1.15em;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 28px;
+  margin: 10px 0 0 0;
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.09);
+  transition: background 0.12s, transform 0.12s;
+}
+
+button:hover {
+  background: linear-gradient(90deg, #2b5876 0%, #6c63ff 100%);
+  transform: scale(1.04);
+}
+
+#log {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.log-entry {
+  background: #e9eaf5;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #30314e;
+  width: 90%;
+  padding: 10px 10px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.04);
+  text-align: center;
+  margin: 0 auto;
+  letter-spacing: 0.5px;
+}
+
+/* עיצוב טקסט תאריך מודגש וגדול */
+.date-text {
+  font-size: 1.35em;
+  font-weight: bold;
+  color: #1a237e;
+  letter-spacing: 0.08em;
+  margin: 12px 0;
+}
+
+/* רספונסיביות */
+@media (max-width: 500px) {
+  .card {
+    padding: 16px 4px;
+  }
+  h1, h2 { font-size: 1em; }
+  .log-entry { font-size: 0.92em; }
+  button { font-size: 0.95em; padding: 9px 17px; }
+  .date-text { font-size: 1.1em; }
+}
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>משפט אקראי</h1>
-    <div id="quote">טוען את zinbin.json…</div>
-    <div class="row">
-      <button id="nextBtn" disabled>תן לי משפט</button>
-    </div>
-    <div id="status"></div>
+
+ <div class="card">
+  <h1>סכום נוכחי: <span id="currentTotal">0</span> ₪</h1>
+  <h2>סה"כ מההתחלה: <span id="allTimeTotal">0</span> ₪</h2>
+  <button onclick="redeem()">פדיתי את הסכום</button>
+  
+  <hr style="margin:32px 0 24px 0; border:none; border-top:1.5px solid #e2e8f0;">
+
+  <h2>בחר משמרת</h2>
+  <div style="margin-bottom:18px;">
+    <label><input type="checkbox" id="noon"> עבדתי צהריים</label>
+    <label><input type="checkbox" id="evening"> עבדתי ערב</label>
   </div>
+  <button onclick="confirmShift()">אישור</button>
+  
+  <hr style="margin:32px 0 24px 0; border:none; border-top:1.5px solid #e2e8f0;">
+
+  <h2>יומן עבודה</h2>
+  <div id="log"></div>
+</div>
 
 <script>
-(() => {
-  const JSON_URL = 'quotes.json'; // ודא שהקובץ באותה תיקייה של ה-HTML
-  const quoteEl = document.getElementById('quote');
-  const statusEl = document.getElementById('status');
-  const nextBtn = document.getElementById('nextBtn');
+  // משתנים כלליים
+  let currentTotal = 0;
+  let allTimeTotal = 0;
+  let logEntries = [];
 
-  let quotes = [];
-  let lastIndex = -1;
+  // --- טעינה מה-localStorage ---
+  window.onload = function() {
+    const savedCurrent = localStorage.getItem("currentTotal");
+    const savedAllTime = localStorage.getItem("allTimeTotal");
+    const savedLog = localStorage.getItem("logEntries");
 
-  function toText(item) {
-    // תומך במבנים שונים: "טקסט", {text:""}, {quote:""}, {q:""}, או אובייקט עם שדות author
-    if (typeof item === 'string') return item;
-    if (item && typeof item === 'object') {
-      const txt = item.text || item.quote || item.q || item.content;
-      const author = item.author || item.by || '';
-      return (txt ? txt : JSON.stringify(item)) + (author ? ` — ${author}` : '');
+    if (savedCurrent) currentTotal = parseInt(savedCurrent);
+    if (savedAllTime) allTimeTotal = parseInt(savedAllTime);
+    if (savedLog) logEntries = JSON.parse(savedLog);
+
+    updateTotals();
+    renderLog();
+  }
+
+  // --- שמירה ל-localStorage ---
+  function saveData() {
+    localStorage.setItem("currentTotal", currentTotal);
+    localStorage.setItem("allTimeTotal", allTimeTotal);
+    localStorage.setItem("logEntries", JSON.stringify(logEntries));
+  }
+
+  // --- אישור משמרת ---
+  function confirmShift() {
+    const noon = document.getElementById("noon").checked;
+    const evening = document.getElementById("evening").checked;
+
+    if (!noon && !evening) {
+      alert("בחר לפחות משמרת אחת");
+      return;
     }
-    return String(item);
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
+
+    if (noon) addShift(dateStr, "צהריים", "12:20");
+    if (evening) addShift(dateStr, "ערב", "18:20");
+
+    updateTotals();
+    saveData();
+
+    // אפס בחירות
+    document.getElementById("noon").checked = false;
+    document.getElementById("evening").checked = false;
   }
 
-  function pickRandom() {
-    if (!quotes.length) return;
-    let i;
-    do { i = Math.floor(Math.random() * quotes.length); }
-    while (quotes.length > 1 && i === lastIndex);
-    lastIndex = i;
-    quoteEl.textContent = toText(quotes[i]);
+  // --- הוספת משמרת ליומן ---
+  function addShift(date, type, time) {
+    currentTotal += 10;
+    allTimeTotal += 10;
+    const entry = `${date} – עבדת ${type} (${time}) → 10₪`;
+    logEntries.push(entry);
+    renderLog();
   }
 
-  async function loadQuotes() {
-    try {
-      const res = await fetch(JSON_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      // תומך גם במערך ישיר וגם במפתח quotes
-      const arr = Array.isArray(data) ? data : (Array.isArray(data.quotes) ? data.quotes : []);
-      if (!arr.length) throw new Error('קובץ JSON ללא משפטים');
-      quotes = arr;
-      statusEl.textContent = '';
-    } catch (err) {
-      console.error('שגיאה בטעינת JSON:', err);
-      statusEl.textContent = '⚠️ לא הצלחתי לטעון את zinbin.json (בדוק נתיב/שרת/פורמט).';
-      quotes = ["גיבוי: כל צעד קטן הוא ניצחון."];
-    } finally {
-      nextBtn.disabled = false;
-      pickRandom();
+  // --- הצגת היומן ---
+  function renderLog() {
+    const logDiv = document.getElementById("log");
+    logDiv.innerHTML = "";
+    logEntries.forEach(e => {
+      const div = document.createElement("div");
+      div.className = "log-entry";
+      div.textContent = e;
+      logDiv.appendChild(div);
+    });
+  }
+
+  // --- עדכון סכומים ---
+  function updateTotals() {
+    document.getElementById("currentTotal").textContent = currentTotal;
+    document.getElementById("allTimeTotal").textContent = allTimeTotal;
+  }
+
+  // --- פדייה ---
+  function redeem() {
+    if (currentTotal === 0) {
+      alert("אין מה לפדות כרגע");
+      return;
     }
+    const entry = `👉 פדית ${currentTotal}₪`;
+    logEntries.push(entry);
+    currentTotal = 0;
+    updateTotals();
+    renderLog();
+    saveData();
   }
-
-  nextBtn.addEventListener('click', pickRandom);
-  document.addEventListener('DOMContentLoaded', loadQuotes);
-})();
 </script>
+
 </body>
 </html>
